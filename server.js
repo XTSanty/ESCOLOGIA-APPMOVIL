@@ -106,21 +106,19 @@ const verificarSesion = (req, res, next) => {
   }
 };
 
-// Rutas para servir páginas HTML
+// === RUTAS ESPECÍFICAS (ORDEN IMPORTANTE) ===
 
 // Página principal (sin sesión)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Páginas protegidas (requieren sesión)
-
-// Home
+// Ruta para home
 app.get('/home', verificarSesion, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+  res.sendFile(path.join(__dirname, 'public', 'Home.html'));
 });
 app.get('/home.html', verificarSesion, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+  res.sendFile(path.join(__dirname, 'public', 'Home.html'));
 });
 
 // Foro
@@ -195,7 +193,9 @@ app.get('/juegos.html', verificarSesion, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'juegos.html'));
 });
 
-// Ruta para páginas no encontradas
+// === RUTA GENÉRICA AL FINAL ===
+
+// Ruta para páginas no encontradas (AHORA VA AL FINAL)
 app.get('*', verificarSesion, (req, res) => {
   res.status(404).send(`
     <h1>Página no encontrada</h1>
