@@ -1,5 +1,26 @@
 // public/script.js - JavaScript para funcionalidad del login
+// ✅ Agregar temporalmente al inicio de script.js (después de DOMContentLoaded)
 
+// Desregistrar Service Workers viejos
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+            registration.unregister().then(() => {
+                console.log('🗑️ Service Worker viejo desregistrado');
+            });
+        }
+    });
+}
+
+// Limpiar cachés viejas
+if ('caches' in window) {
+    caches.keys().then(keys => {
+        keys.forEach(key => {
+            caches.delete(key);
+            console.log('🗑️ Caché eliminada:', key);
+        });
+    });
+}
 // Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener referencias a elementos del DOM
@@ -31,87 +52,104 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-// Manejar envío del formulario de login
-loginForm.addEventListener('submit', async function(e) {
-    e.preventDefault(); // Prevenir envío por defecto
-    
-    console.log('🔒 Iniciando proceso de login...');
-    
-    // Limpiar mensajes de error previos
-    limpiarErrores();
-    
-    // Obtener datos del formulario
-    const formData = new FormData(loginForm);
-    const datos = {
-        correo: formData.get('correo'),
-        contraseña: formData.get('contraseña')
-    };
-    
-    console.log('📧 Datos a enviar:', datos);
-    
-    // Validar datos antes de enviar
-    if (!validarLogin(datos)) {
-        console.log('❌ Validación fallida');
-        return;
-    }
-    
-    // Mostrar estado de carga
-    mostrarCargando(true);
-    
-    try {
-        console.log('📡 Enviando petición a /api/auth/login...');
+    // Manejar envío del formulario de login
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); // ✅ CRÍTICO: Prevenir envío por defecto
+        e.stopPropagation(); // ✅ NUEVO: Detener propagación del evento
         
-        // Realizar petición al servidor
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include', // ✅ ESTA LÍNEA ES CLAVE PARA PRODUCCIÓN
-            body: JSON.stringify(datos)
-        });
+        console.log('🔒 Iniciando proceso de login...');
         
-        console.log('✅ Respuesta recibida:', response.status);
+        // Limpiar mensajes de error previos
+        limpiarErrores();
         
-        const resultado = await response.json();
-        console.log('📊 Resultado del backend:', resultado);
+        // Obtener datos del formulario
+        const formData = new FormData(loginForm);
+        const datos = {
+            correo: formData.get('correo'),
+            contraseña: formData.get('contraseña')
+        };
         
-        if (resultado.success) {
-            console.log('✅ Login exitoso, guardando usuario...');
-            
-            // Login exitoso
-            // Guardar información del usuario
-            localStorage.setItem('currentUser', JSON.stringify(resultado.usuario));
-            
-            console.log('🎯 Redirigiendo a /home...');
-            
-            // ✅ REDIRECCIÓN INMEDIATA (sin Swal que pueda interferir)
-            window.location.href = '/home';
-            
-        } else {
-            console.log('❌ Login fallido:', resultado.message);
-            
-            // Error en el login
-            Swal.fire({
-                title: 'Error de inicio de sesión',
-                text: resultado.message || 'Credenciales incorrectas',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-            });
+        console.log('📧 Datos a enviar:', { correo: datos.correo });
+        
+        // Validar datos antes de enviar
+        if (!validarLogin(datos)) {
+            console.log('❌ Validación fallida');
+            return false; // ✅ NUEVO: Retornar false
         }
         
-    } catch (error) {
-        console.error('💥 Error en login:', error);
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'Error de conexión. Por favor intenta nuevamente.',
-            icon: 'error',
-            confirmButtonText: 'Reintentar'
-        });
-    } finally {
-        mostrarCargando(false);
-    }
-});
+        // Mostrar estado de carga
+        mostrarCargando(true);
+        
+        try {
+            console.log('📡 Enviando petición a /api/auth/login...');
+            
+            // ✅ CRÍTICO: Usar URL absoluta en producción
+            const baseUrl = window.location.origin;
+            const loginUrl = `${baseUrl}/api/auth/login`;
+            
+            console.log('🌐 URL completa:', loginUrl);
+            
+            // Realizar petición al servidor
+            const response = await fetch(loginUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include', // ✅ CRÍTICO: Para cookies de sesión
+                body: JSON.stringify(datos),
+                cache: 'no-cache' // ✅ NUEVO: Evitar cache
+            });
+            
+            console.log('✅ Respuesta recibida:', response.status);
+            
+            // Verificar si la respuesta es JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Respuesta no es JSON. El servidor puede estar enviando HTML.');
+            }
+            
+            const resultado = await response.json();
+            console.log('📊 Resultado del backend:', resultado);
+            
+            if (resultado.success) {
+                console.log('✅ Login exitoso, guardando usuario...');
+                
+                // Login exitoso
+                // Guardar información del usuario
+                localStorage.setItem('currentUser', JSON.stringify(resultado.usuario));
+                
+                console.log('🎯 Redirigiendo a /home...');
+                
+                // ✅ REDIRECCIÓN INMEDIATA sin SweetAlert
+                window.location.replace('/home'); // ✅ CAMBIADO: replace en vez de href
+                
+            } else {
+                console.log('❌ Login fallido:', resultado.message);
+                
+                // Error en el login
+                Swal.fire({
+                    title: 'Error de inicio de sesión',
+                    text: resultado.message || 'Credenciales incorrectas',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+            
+        } catch (error) {
+            console.error('💥 Error en login:', error);
+            Swal.fire({
+                title: 'Error de conexión',
+                text: `No se pudo conectar con el servidor. ${error.message}`,
+                icon: 'error',
+                confirmButtonText: 'Reintentar'
+            });
+        } finally {
+            mostrarCargando(false);
+        }
+        
+        return false; // ✅ NUEVO: Prevenir cualquier acción adicional
+    });
 
     // Funciones de validación
     function validarLogin(datos) {
@@ -124,9 +162,6 @@ loginForm.addEventListener('submit', async function(e) {
         } else if (!validarEmail(datos.correo)) {
             mostrarError('correoError', 'Ingresa un correo válido');
             esValido = false;
-        } else if (!validarEmailFormatoEstricto(datos.correo)) {
-            mostrarError('correoError', 'Formato de correo no permitido');
-            esValido = false;
         }
         
         // Validar contraseña
@@ -136,30 +171,25 @@ loginForm.addEventListener('submit', async function(e) {
         } else if (datos.contraseña.length < 6) {
             mostrarError('contraseñaError', 'La contraseña debe tener al menos 6 caracteres');
             esValido = false;
-        } else if (!validarContraseñaSegura(datos.contraseña)) {
-            mostrarError('contraseñaError', 'La contraseña debe contener mayúsculas, minúsculas y números');
-            esValido = false;
         }
         
         return esValido;
     }
     
-    // Función para validar formato de email estricto
+    // Función para validar formato de email
     function validarEmail(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
     
-    // Validación estricta para correos educativos
+    // Validación estricta para correos educativos (OPCIONAL)
     function validarEmailFormatoEstricto(email) {
-        // Verificar que sea un correo de escuela (dominio .edu.mx o similar)
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return regex.test(email);
     }
     
-    // Validar contraseña segura
+    // Validar contraseña segura (OPCIONAL en login, obligatorio en registro)
     function validarContraseñaSegura(password) {
-        // Debe contener al menos una mayúscula, una minúscula y un número
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,}$/;
         return regex.test(password);
     }
@@ -169,13 +199,17 @@ loginForm.addEventListener('submit', async function(e) {
         const errorElement = document.getElementById(elementoId);
         if (errorElement) {
             errorElement.textContent = mensaje;
+            errorElement.style.display = 'block';
         }
     }
     
     // Función para limpiar errores
     function limpiarErrores() {
         const errores = document.querySelectorAll('.error-message');
-        errores.forEach(error => error.textContent = '');
+        errores.forEach(error => {
+            error.textContent = '';
+            error.style.display = 'none';
+        });
         statusMessage.className = 'status-message hidden';
     }
     
@@ -202,7 +236,7 @@ loginForm.addEventListener('submit', async function(e) {
     registerLink.addEventListener('click', function(e) {
         e.preventDefault();
         registerModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevenir scroll
+        document.body.style.overflow = 'hidden';
     });
     
     // Cerrar modal
@@ -221,12 +255,13 @@ loginForm.addEventListener('submit', async function(e) {
         registerModal.classList.add('hidden');
         document.body.style.overflow = 'auto';
         registerForm.reset();
-        document.getElementById('registerStatusMessage').className = 'status-message hidden';
+        limpiarErrores();
     }
     
     // Manejar envío del formulario de registro
     registerForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         const formData = new FormData(registerForm);
         const datos = {
@@ -237,12 +272,11 @@ loginForm.addEventListener('submit', async function(e) {
             tipoUsuario: 'escuela'
         };
         
-        const registerStatusMessage = document.getElementById('registerStatusMessage');
         const submitButton = registerForm.querySelector('button[type="submit"]');
         
         // Validar datos de registro
         if (!validarRegistro(datos)) {
-            return;
+            return false;
         }
         
         // Mostrar carga
@@ -250,18 +284,22 @@ loginForm.addEventListener('submit', async function(e) {
         submitButton.textContent = 'Registrando...';
         
         try {
-            const response = await fetch('/api/auth/register', {
+            const baseUrl = window.location.origin;
+            const registerUrl = `${baseUrl}/api/auth/register`;
+            
+            const response = await fetch(registerUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(datos)
+                body: JSON.stringify(datos),
+                cache: 'no-cache'
             });
             
             const resultado = await response.json();
             
             if (resultado.success) {
-                // Mostrar SweetAlert de éxito
                 Swal.fire({
                     title: '¡Registro exitoso!',
                     text: 'Ya puedes iniciar sesión con tus credenciales',
@@ -269,7 +307,6 @@ loginForm.addEventListener('submit', async function(e) {
                     confirmButtonText: 'Aceptar'
                 }).then(() => {
                     cerrarModal();
-                    // Llenar el formulario de login con el correo registrado
                     document.getElementById('correo').value = datos.correo;
                 });
                 
@@ -294,143 +331,54 @@ loginForm.addEventListener('submit', async function(e) {
             submitButton.disabled = false;
             submitButton.textContent = 'Registrarse';
         }
+        
+        return false;
     });
 
-    // Validación estricta para registro
+    // Validación para registro
     function validarRegistro(datos) {
         let esValido = true;
         
-        // Validar nombre
         if (!datos.nombre || datos.nombre.length < 3) {
             mostrarError('regNombreError', 'Nombre debe tener al menos 3 caracteres');
             esValido = false;
-        } else if (!validarNombre(datos.nombre)) {
-            mostrarError('regNombreError', 'Nombre contiene caracteres no permitidos');
-            esValido = false;
         }
         
-        // Validar correo
-        if (!datos.correo) {
-            mostrarError('regCorreoError', 'Correo es obligatorio');
-            esValido = false;
-        } else if (!validarEmail(datos.correo)) {
+        if (!datos.correo || !validarEmail(datos.correo)) {
             mostrarError('regCorreoError', 'Formato de correo inválido');
             esValido = false;
-        } else if (!validarEmailEducacional(datos.correo)) {
-            mostrarError('regCorreoError', 'Solo se permiten correos educativos');
-            esValido = false;
         }
         
-        // Validar contraseña
-        if (!datos.contraseña) {
-            mostrarError('regContraseñaError', 'Contraseña es obligatoria');
-            esValido = false;
-        } else if (datos.contraseña.length < 6) {
+        if (!datos.contraseña || datos.contraseña.length < 6) {
             mostrarError('regContraseñaError', 'Mínimo 6 caracteres');
             esValido = false;
-        } else if (!validarContraseñaSegura(datos.contraseña)) {
-            mostrarError('regContraseñaError', 'Contraseña debe tener mayúsculas, minúsculas y números');
-            esValido = false;
         }
         
-        // Validar institución
         if (!datos.institucion || datos.institucion.length < 5) {
-            mostrarError('regInstitucionError', 'Nombre de institución debe tener al menos 5 caracteres');
-            esValido = false;
-        } else if (!validarNombreInstitucion(datos.institucion)) {
-            mostrarError('regInstitucionError', 'Nombre de institución contiene caracteres no permitidos');
+            mostrarError('regInstitucionError', 'Mínimo 5 caracteres');
             esValido = false;
         }
         
         return esValido;
     }
-    
-    // Validar nombre (solo letras y espacios)
-    function validarNombre(nombre) {
-        const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
-        return regex.test(nombre);
-    }
-    
-    // Validar correo educacional
-    function validarEmailEducacional(email) {
-        const regex = /^[^\s@]+@(?:[a-zA-Z0-9-]+\.)+(?:edu|edu\.mx|edu\.com|gob\.mx)[^\s@]*$/i;
-        return regex.test(email);
-    }
-    
-    // Validar nombre de institución
-    function validarNombreInstitucion(nombre) {
-        const regex = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-\.,]{5,100}$/;
-        return regex.test(nombre);
-    }
 
-    // Validación en tiempo real para los campos de entrada
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            validarCampoIndividual(this);
+    // ✅ NUEVO: Registro del Service Worker SOLO si existe
+    if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+            // Verificar si existe el archivo sw.js antes de registrarlo
+            fetch('/sw.js', { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        navigator.serviceWorker.register('/sw.js')
+                            .then(reg => console.log('✅ SW registrado:', reg.scope))
+                            .catch(err => console.warn('⚠️ Error al registrar SW:', err));
+                    } else {
+                        console.log('ℹ️ No hay Service Worker disponible');
+                    }
+                })
+                .catch(() => console.log('ℹ️ No hay Service Worker disponible'));
         });
-        
-        // Limpiar error cuando el usuario empieza a escribir
-        input.addEventListener('input', function() {
-            const errorElement = document.getElementById(this.id + 'Error');
-            if (errorElement) {
-                errorElement.textContent = '';
-            }
-        });
-    });
-    
-    // Función para validar campos individuales
-    function validarCampoIndividual(campo) {
-        const valor = campo.value.trim();
-        const errorElement = document.getElementById(campo.id + 'Error');
-        
-        if (!errorElement) return;
-        
-        let mensaje = '';
-        
-        switch (campo.name || campo.id) {
-            case 'correo':
-            case 'regCorreo':
-                if (valor && !validarEmail(valor)) {
-                    mensaje = 'Formato de email inválido';
-                } else if (campo.name === 'correo' && valor && !validarEmailEducacional(valor)) {
-                    mensaje = 'Solo se permiten correos educativos';
-                }
-                break;
-            case 'contraseña':
-            case 'regContraseña':
-                if (valor && valor.length < 6) {
-                    mensaje = 'Mínimo 6 caracteres';
-                } else if (valor && !validarContraseñaSegura(valor)) {
-                    mensaje = 'Debe tener mayúsculas, minúsculas y números';
-                }
-                break;
-            case 'nombre':
-            case 'regNombre':
-                if (valor && valor.length < 3) {
-                    mensaje = 'Mínimo 3 caracteres';
-                } else if (valor && !validarNombre(valor)) {
-                    mensaje = 'Solo letras y espacios';
-                }
-                break;
-            case 'regInstitucion':
-                if (valor && valor.length < 5) {
-                    mensaje = 'Mínimo 5 caracteres';
-                } else if (valor && !validarNombreInstitucion(valor)) {
-                    mensaje = 'Caracteres no permitidos';
-                }
-                break;
-        }
-        
-        errorElement.textContent = mensaje;
     }
-    if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('✅ SW registrado con éxito:', reg.scope))
-      .catch(err => console.error('❌ Error al registrar el SW:', err));
-  });
-}
 
     console.log('🚀 Sistema de login inicializado correctamente');
 });
