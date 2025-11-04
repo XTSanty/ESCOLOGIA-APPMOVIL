@@ -33,11 +33,12 @@ const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'tu-secreto-aqui-cambia-esto',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días en milisegundos
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production' // true en producción con HTTPS
-  }
+ cookie: {
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production'
+}
+
 };
 
 // Solo usar MongoStore si hay una URL de MongoDB
