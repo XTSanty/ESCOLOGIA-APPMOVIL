@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
 loginForm.addEventListener('submit', async function(e) {
     e.preventDefault(); // Prevenir envío por defecto
     
+    console.log('🔒 Iniciando proceso de login...');
+    
     // Limpiar mensajes de error previos
     limpiarErrores();
     
@@ -45,8 +47,11 @@ loginForm.addEventListener('submit', async function(e) {
         contraseña: formData.get('contraseña')
     };
     
+    console.log('📧 Datos a enviar:', datos);
+    
     // Validar datos antes de enviar
     if (!validarLogin(datos)) {
+        console.log('❌ Validación fallida');
         return;
     }
     
@@ -54,6 +59,8 @@ loginForm.addEventListener('submit', async function(e) {
     mostrarCargando(true);
     
     try {
+        console.log('📡 Enviando petición a /api/auth/login...');
+        
         // Realizar petición al servidor
         const response = await fetch('/api/auth/login', {
             method: 'POST',
@@ -64,12 +71,19 @@ loginForm.addEventListener('submit', async function(e) {
             body: JSON.stringify(datos)
         });
         
+        console.log('✅ Respuesta recibida:', response.status);
+        
         const resultado = await response.json();
+        console.log('📊 Resultado del backend:', resultado);
         
         if (resultado.success) {
+            console.log('✅ Login exitoso, guardando usuario...');
+            
             // Login exitoso
             // Guardar información del usuario
             localStorage.setItem('currentUser', JSON.stringify(resultado.usuario));
+            
+            console.log('🎯 Redirigiendo a /home...');
             
             // Mostrar SweetAlert de éxito y redirigir
             Swal.fire({
@@ -80,10 +94,13 @@ loginForm.addEventListener('submit', async function(e) {
                 timerProgressBar: true,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = '/home';  // Redirección corregida
+                console.log('🔄 Ejecutando redirección a /home...');
+                window.location.href = '/home';
             });
             
         } else {
+            console.log('❌ Login fallido:', resultado.message);
+            
             // Error en el login
             Swal.fire({
                 title: 'Error de inicio de sesión',
@@ -94,7 +111,7 @@ loginForm.addEventListener('submit', async function(e) {
         }
         
     } catch (error) {
-        console.error('Error en login:', error);
+        console.error('💥 Error en login:', error);
         Swal.fire({
             title: 'Error de conexión',
             text: 'Error de conexión. Por favor intenta nuevamente.',
