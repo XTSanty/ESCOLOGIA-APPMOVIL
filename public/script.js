@@ -1,133 +1,169 @@
 // public/script.js - JavaScript para funcionalidad del login
-// ✅ Agregar temporalmente al inicio de script.js (después de DOMContentLoaded)
 
-// Desregistrar Service Workers viejos
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-            registration.unregister().then(() => {
-                console.log('🗑️ Service Worker viejo desregistrado');
-            });
-        }
-    });
-}
-
-// Limpiar cachés viejas
-if ('caches' in window) {
-    caches.keys().then(keys => {
-        keys.forEach(key => {
-            caches.delete(key);
-            console.log('🗑️ Caché eliminada:', key);
-        });
-    });
-}
-// Esperar a que el DOM esté completamente cargado
-document.addEventListener('DOMContentLoaded', function() {
+// ✅ CRÍTICO: Esperar a que TODO esté cargado (incluyendo SweetAlert2)
+window.addEventListener('load', function() {
+    console.log('🚀 Iniciando sistema de login...');
+    
+    // Verificar que SweetAlert2 esté disponible
+    if (typeof Swal === 'undefined') {
+        console.error('❌ SweetAlert2 no está cargado');
+        alert('Error: No se pudo cargar el sistema de alertas');
+        return;
+    }
+    
     // Obtener referencias a elementos del DOM
     const loginForm = document.getElementById('loginForm');
+    const loginButton = document.getElementById('loginButton');
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('contraseña');
     const statusMessage = document.getElementById('statusMessage');
-    const loginButton = document.getElementById('loginButton');
     
     // Modal de registro
     const registerModal = document.getElementById('registerModal');
     const registerLink = document.getElementById('registerLink');
     const closeModal = document.getElementById('closeModal');
     const registerForm = document.getElementById('registerForm');
+    const registerSubmitBtn = document.getElementById('registerSubmitBtn');
+
+    // Verificar que todos los elementos existan
+    if (!loginForm || !loginButton) {
+        console.error('❌ Elementos del formulario no encontrados');
+        return;
+    }
+
+    console.log('✅ Elementos del DOM encontrados');
 
     // Funcionalidad para mostrar/ocultar contraseña
-    togglePassword.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            if (icon) {
+                if (type === 'password') {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            }
+        });
+    }
+
+    // ✅ CRÍTICO: Manejar CLICK del botón (no submit del form)
+    loginButton.addEventListener('click', async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         
-        // Cambiar el ícono
-        const icon = this.querySelector('i');
-        if (type === 'password') {
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        } else {
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        }
+        console.log('🔒 Click en botón de login detectado');
+        
+        await handleLogin();
     });
 
-    // Manejar envío del formulario de login
-    loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault(); // ✅ CRÍTICO: Prevenir envío por defecto
-        e.stopPropagation(); // ✅ NUEVO: Detener propagación del evento
+    // ✅ También manejar Enter en los inputs
+    const correoInput = document.getElementById('correo');
+    const contraseñaInput = document.getElementById('contraseña');
+    
+    if (correoInput) {
+        correoInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleLogin();
+            }
+        });
+    }
+    
+    if (contraseñaInput) {
+        contraseñaInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleLogin();
+            }
+        });
+    }
+
+    // ✅ Función principal de login
+    async function handleLogin() {
+        console.log('🔐 Iniciando proceso de login...');
         
-        console.log('🔒 Iniciando proceso de login...');
-        
-        // Limpiar mensajes de error previos
+        // Limpiar mensajes previos
         limpiarErrores();
         
         // Obtener datos del formulario
-        const formData = new FormData(loginForm);
-        const datos = {
-            correo: formData.get('correo'),
-            contraseña: formData.get('contraseña')
-        };
+        const correo = document.getElementById('correo').value.trim();
+        const contraseña = document.getElementById('contraseña').value;
         
-        console.log('📧 Datos a enviar:', { correo: datos.correo });
+        const datos = { correo, contraseña };
         
-        // Validar datos antes de enviar
+        console.log('📧 Email ingresado:', correo);
+        
+        // Validar datos
         if (!validarLogin(datos)) {
             console.log('❌ Validación fallida');
-            return false; // ✅ NUEVO: Retornar false
+            return;
         }
         
         // Mostrar estado de carga
         mostrarCargando(true);
         
         try {
-            console.log('📡 Enviando petición a /api/auth/login...');
+            console.log('📡 Enviando petición de login...');
             
-            // ✅ CRÍTICO: Usar URL absoluta en producción
             const baseUrl = window.location.origin;
             const loginUrl = `${baseUrl}/api/auth/login`;
             
-            console.log('🌐 URL completa:', loginUrl);
+            console.log('🌐 URL:', loginUrl);
             
-            // Realizar petición al servidor
             const response = await fetch(loginUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                credentials: 'include', // ✅ CRÍTICO: Para cookies de sesión
-                body: JSON.stringify(datos),
-                cache: 'no-cache' // ✅ NUEVO: Evitar cache
+                credentials: 'include',
+                body: JSON.stringify(datos)
             });
             
-            console.log('✅ Respuesta recibida:', response.status);
+            console.log('📨 Status de respuesta:', response.status);
             
-            // Verificar si la respuesta es JSON
+            // Verificar tipo de contenido
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Respuesta no es JSON. El servidor puede estar enviando HTML.');
+                throw new Error('El servidor no respondió con JSON');
             }
             
             const resultado = await response.json();
-            console.log('📊 Resultado del backend:', resultado);
+            console.log('📊 Resultado:', resultado);
             
             if (resultado.success) {
-                console.log('✅ Login exitoso, guardando usuario...');
+                console.log('✅ Login exitoso');
                 
-                // Login exitoso
-                // Guardar información del usuario
+                // Guardar usuario en localStorage
                 localStorage.setItem('currentUser', JSON.stringify(resultado.usuario));
                 
-                console.log('🎯 Redirigiendo a /home...');
+                // ✅ Mostrar SweetAlert de éxito
+                await Swal.fire({
+                    title: '¡Bienvenido!',
+                    text: `Hola ${resultado.usuario.nombre}`,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 
-                // ✅ REDIRECCIÓN INMEDIATA sin SweetAlert
-                window.location.replace('/home'); // ✅ CAMBIADO: replace en vez de href
+                console.log('🎯 Redirigiendo a home...');
+                
+                // Pequeño delay para asegurar que la alerta se vea
+                setTimeout(() => {
+                    window.location.href = '/home';
+                }, 100);
                 
             } else {
                 console.log('❌ Login fallido:', resultado.message);
                 
-                // Error en el login
+                mostrarCargando(false);
+                
                 Swal.fire({
                     title: 'Error de inicio de sesión',
                     text: resultado.message || 'Credenciales incorrectas',
@@ -138,24 +174,22 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('💥 Error en login:', error);
+            
+            mostrarCargando(false);
+            
             Swal.fire({
                 title: 'Error de conexión',
-                text: `No se pudo conectar con el servidor. ${error.message}`,
+                text: 'No se pudo conectar con el servidor. Verifica tu conexión.',
                 icon: 'error',
                 confirmButtonText: 'Reintentar'
             });
-        } finally {
-            mostrarCargando(false);
         }
-        
-        return false; // ✅ NUEVO: Prevenir cualquier acción adicional
-    });
+    }
 
     // Funciones de validación
     function validarLogin(datos) {
         let esValido = true;
         
-        // Validar correo electrónico
         if (!datos.correo) {
             mostrarError('correoError', 'El correo es obligatorio');
             esValido = false;
@@ -164,37 +198,22 @@ document.addEventListener('DOMContentLoaded', function() {
             esValido = false;
         }
         
-        // Validar contraseña
         if (!datos.contraseña) {
             mostrarError('contraseñaError', 'La contraseña es obligatoria');
             esValido = false;
         } else if (datos.contraseña.length < 6) {
-            mostrarError('contraseñaError', 'La contraseña debe tener al menos 6 caracteres');
+            mostrarError('contraseñaError', 'Mínimo 6 caracteres');
             esValido = false;
         }
         
         return esValido;
     }
     
-    // Función para validar formato de email
     function validarEmail(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
     
-    // Validación estricta para correos educativos (OPCIONAL)
-    function validarEmailFormatoEstricto(email) {
-        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return regex.test(email);
-    }
-    
-    // Validar contraseña segura (OPCIONAL en login, obligatorio en registro)
-    function validarContraseñaSegura(password) {
-        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,}$/;
-        return regex.test(password);
-    }
-    
-    // Función para mostrar errores específicos
     function mostrarError(elementoId, mensaje) {
         const errorElement = document.getElementById(elementoId);
         if (errorElement) {
@@ -203,23 +222,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Función para limpiar errores
     function limpiarErrores() {
         const errores = document.querySelectorAll('.error-message');
         errores.forEach(error => {
             error.textContent = '';
             error.style.display = 'none';
         });
-        statusMessage.className = 'status-message hidden';
+        if (statusMessage) {
+            statusMessage.className = 'status-message hidden';
+        }
     }
     
-    // Función para mostrar mensajes de estado
-    function mostrarMensaje(tipo, mensaje) {
-        statusMessage.textContent = mensaje;
-        statusMessage.className = `status-message ${tipo}`;
-    }
-    
-    // Función para mostrar estado de carga
     function mostrarCargando(cargando) {
         if (cargando) {
             loginButton.disabled = true;
@@ -232,56 +245,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // === FUNCIONALIDAD DEL MODAL DE REGISTRO ===
     
-    // Abrir modal de registro
-    registerLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        registerModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    });
-    
-    // Cerrar modal
-    closeModal.addEventListener('click', function() {
-        cerrarModal();
-    });
-    
-    // Cerrar modal al hacer clic fuera
-    registerModal.addEventListener('click', function(e) {
-        if (e.target === registerModal) {
-            cerrarModal();
-        }
-    });
-    
-    function cerrarModal() {
-        registerModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        registerForm.reset();
-        limpiarErrores();
+    if (registerLink) {
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            registerModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
     }
     
-    // Manejar envío del formulario de registro
-    registerForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const formData = new FormData(registerForm);
+    if (closeModal) {
+        closeModal.addEventListener('click', function() {
+            cerrarModal();
+        });
+    }
+    
+    if (registerModal) {
+        registerModal.addEventListener('click', function(e) {
+            if (e.target === registerModal) {
+                cerrarModal();
+            }
+        });
+    }
+    
+    function cerrarModal() {
+        if (registerModal) {
+            registerModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            registerForm.reset();
+            limpiarErrores();
+        }
+    }
+    
+    // ✅ Manejar CLICK del botón de registro
+    if (registerSubmitBtn) {
+        registerSubmitBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            await handleRegister();
+        });
+    }
+
+    async function handleRegister() {
         const datos = {
-            nombre: formData.get('nombre'),
-            correo: formData.get('correo'),
-            contraseña: formData.get('contraseña'),
-            institucion: formData.get('institucion'),
+            nombre: document.getElementById('regNombre').value.trim(),
+            correo: document.getElementById('regCorreo').value.trim(),
+            contraseña: document.getElementById('regContraseña').value,
+            institucion: document.getElementById('regInstitucion').value.trim(),
             tipoUsuario: 'escuela'
         };
         
-        const submitButton = registerForm.querySelector('button[type="submit"]');
-        
-        // Validar datos de registro
         if (!validarRegistro(datos)) {
-            return false;
+            return;
         }
         
-        // Mostrar carga
-        submitButton.disabled = true;
-        submitButton.textContent = 'Registrando...';
+        registerSubmitBtn.disabled = true;
+        registerSubmitBtn.textContent = 'Registrando...';
         
         try {
             const baseUrl = window.location.origin;
@@ -293,22 +312,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(datos),
-                cache: 'no-cache'
+                body: JSON.stringify(datos)
             });
             
             const resultado = await response.json();
             
             if (resultado.success) {
-                Swal.fire({
+                await Swal.fire({
                     title: '¡Registro exitoso!',
-                    text: 'Ya puedes iniciar sesión con tus credenciales',
+                    text: 'Ya puedes iniciar sesión',
                     icon: 'success',
                     confirmButtonText: 'Aceptar'
-                }).then(() => {
-                    cerrarModal();
-                    document.getElementById('correo').value = datos.correo;
                 });
+                
+                cerrarModal();
+                document.getElementById('correo').value = datos.correo;
                 
             } else {
                 Swal.fire({
@@ -328,24 +346,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 confirmButtonText: 'Reintentar'
             });
         } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Registrarse';
+            registerSubmitBtn.disabled = false;
+            registerSubmitBtn.textContent = 'Registrarse';
         }
-        
-        return false;
-    });
+    }
 
-    // Validación para registro
     function validarRegistro(datos) {
         let esValido = true;
         
         if (!datos.nombre || datos.nombre.length < 3) {
-            mostrarError('regNombreError', 'Nombre debe tener al menos 3 caracteres');
+            mostrarError('regNombreError', 'Mínimo 3 caracteres');
             esValido = false;
         }
         
         if (!datos.correo || !validarEmail(datos.correo)) {
-            mostrarError('regCorreoError', 'Formato de correo inválido');
+            mostrarError('regCorreoError', 'Email inválido');
             esValido = false;
         }
         
@@ -362,23 +377,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return esValido;
     }
 
-    // ✅ NUEVO: Registro del Service Worker SOLO si existe
+    // ✅ Registro condicional del Service Worker
     if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
-        window.addEventListener('load', () => {
-            // Verificar si existe el archivo sw.js antes de registrarlo
-            fetch('/sw.js', { method: 'HEAD' })
-                .then(response => {
-                    if (response.ok) {
-                        navigator.serviceWorker.register('/sw.js')
-                            .then(reg => console.log('✅ SW registrado:', reg.scope))
-                            .catch(err => console.warn('⚠️ Error al registrar SW:', err));
-                    } else {
-                        console.log('ℹ️ No hay Service Worker disponible');
-                    }
-                })
-                .catch(() => console.log('ℹ️ No hay Service Worker disponible'));
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(reg => reg.unregister());
+            console.log('🗑️ Service Workers anteriores eliminados');
         });
+        
+        setTimeout(() => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('✅ SW registrado:', reg.scope))
+                .catch(err => console.warn('⚠️ SW no disponible:', err));
+        }, 2000);
     }
 
-    console.log('🚀 Sistema de login inicializado correctamente');
+    console.log('✅ Sistema de login completamente inicializado');
 });

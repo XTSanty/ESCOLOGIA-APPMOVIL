@@ -8,6 +8,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- ✅ CRÍTICO: SweetAlert2 ANTES de script.js -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -80,8 +81,8 @@
                 <h2>Iniciar Sesión</h2>
                 <p>Accede a tu cuenta para conectar con otras escuelas</p>
 
-                <!-- Formulario de login -->
-                <form id="loginForm" class="login-form">
+                <!-- ✅ CRÍTICO: Atributo onsubmit="return false;" para prevenir envío -->
+                <form id="loginForm" class="login-form" onsubmit="return false;">
                     <!-- Campo de correo electrónico -->
                     <div class="input-group">
                         <label for="correo">
@@ -133,8 +134,8 @@
                         <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
                     </div>
 
-                    <!-- Botón de envío -->
-                    <button type="submit" class="login-button" id="loginButton">
+                    <!-- ✅ CRÍTICO: type="button" para evitar submit automático -->
+                    <button type="button" class="login-button" id="loginButton">
                         <i class="fas fa-sign-in-alt"></i>
                         Iniciar Sesión
                     </button>
@@ -156,7 +157,7 @@
         <div class="modal-content">
             <span class="close" id="closeModal">&times;</span>
             <h3>Registro de Nueva Escuela</h3>
-            <form id="registerForm">
+            <form id="registerForm" onsubmit="return false;">
                 <div class="input-group">
                     <label for="regNombre">Nombre del responsable</label>
                     <input type="text" id="regNombre" name="nombre" required>
@@ -181,40 +182,39 @@
                     <span class="error-message" id="regInstitucionError"></span>
                 </div>
                 
-                <button type="submit" class="login-button">Registrarse</button>
+                <button type="button" class="login-button" id="registerSubmitBtn">Registrarse</button>
                 <div id="registerStatusMessage" class="status-message hidden"></div>
             </form>
         </div>
     </div>
 
-    <!-- JavaScript para funcionalidad -->
+    <!-- ✅ JavaScript para funcionalidad - AL FINAL -->
     <script src="script.js"></script>
-    <!-- Service Worker -->
-<script>
- // Variables globales para PWA
-let deferredPrompt;
+    
+    <!-- Service Worker - Opcional -->
+    <script>
+        // Variables globales para PWA
+        let deferredPrompt;
 
-// Detectar si es instalable
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Mostrar botón de instalación si quieres
-  console.log('✅ PWA lista para instalarse');
-});
+        // Detectar si es instalable
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('✅ PWA lista para instalarse');
+        });
 
-// Función para instalar (opcional)
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('Usuario aceptó la instalación');
-      }
-      deferredPrompt = null;
-    });
-  }
-}
-</script>
+        // Función para instalar (opcional)
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó la instalación');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+    </script>
 </body>
 </html>
