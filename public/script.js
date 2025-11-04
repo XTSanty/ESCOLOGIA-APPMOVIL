@@ -424,6 +424,13 @@ loginForm.addEventListener('submit', async function(e) {
         
         errorElement.textContent = mensaje;
     }
-    
+    if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('✅ SW registrado con éxito:', reg.scope))
+      .catch(err => console.error('❌ Error al registrar el SW:', err));
+  });
+}
+
     console.log('🚀 Sistema de login inicializado correctamente');
 });
