@@ -86,20 +86,21 @@ loginForm.addEventListener('submit', async function(e) {
             console.log('🎯 Redirigiendo a /home...');
             
             // Mostrar SweetAlert de éxito y redirigir
-            Swal.fire({
-                title: '¡Inicio de sesión exitoso!',
-                text: `Bienvenido ${resultado.usuario.nombre}`,
-                icon: 'success',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false
-            }).then(() => {
-                console.log('🔄 Ejecutando redirección a /home...');
-                window.location.href = '/home';
-            });
-            
-        } else {
-            console.log('❌ Login fallido:', resultado.message);
+          // Mostrar SweetAlert de éxito
+Swal.fire({
+    title: '¡Inicio de sesión exitoso!',
+    text: `Bienvenido ${resultado.usuario.nombre}`,
+    icon: 'success',
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    timer: 1500, // Un poco más corto
+    timerProgressBar: true
+});
+
+// Redirigir inmediatamente después de mostrar el mensaje
+console.log('🔄 Ejecutando redirección a /home...');
+window.location.href = '/home';
             
             // Error en el login
             Swal.fire({
