@@ -31,79 +31,80 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Manejar envío del formulario de login
-    loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Prevenir envío por defecto
+// Manejar envío del formulario de login
+loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevenir envío por defecto
+    
+    // Limpiar mensajes de error previos
+    limpiarErrores();
+    
+    // Obtener datos del formulario
+    const formData = new FormData(loginForm);
+    const datos = {
+        correo: formData.get('correo'),
+        contraseña: formData.get('contraseña')
+    };
+    
+    // Validar datos antes de enviar
+    if (!validarLogin(datos)) {
+        return;
+    }
+    
+    // Mostrar estado de carga
+    mostrarCargando(true);
+    
+    try {
+        // Realizar petición al servidor
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include', // ✅ ESTA LÍNEA ES CLAVE PARA PRODUCCIÓN
+            body: JSON.stringify(datos)
+        });
         
-        // Limpiar mensajes de error previos
-        limpiarErrores();
+        const resultado = await response.json();
         
-        // Obtener datos del formulario
-        const formData = new FormData(loginForm);
-        const datos = {
-            correo: formData.get('correo'),
-            contraseña: formData.get('contraseña')
-        };
-        
-        // Validar datos antes de enviar
-        if (!validarLogin(datos)) {
-            return;
-        }
-        
-        // Mostrar estado de carga
-        mostrarCargando(true);
-        
-        try {
-            // Realizar petición al servidor
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(datos)
-            });
+        if (resultado.success) {
+            // Login exitoso
+            // Guardar información del usuario
+            localStorage.setItem('currentUser', JSON.stringify(resultado.usuario));
             
-            const resultado = await response.json();
-            
-            if (resultado.success) {
-                // Login exitoso
-                // Guardar información del usuario
-                localStorage.setItem('currentUser', JSON.stringify(resultado.usuario));
-                
-                // Mostrar SweetAlert de éxito y redirigir
-                Swal.fire({
-                    title: '¡Inicio de sesión exitoso!',
-                    text: `Bienvenido ${resultado.usuario.nombre}`,
-                    icon: 'success',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = '/home';  // Redirección corregida
-                });
-                
-            } else {
-                // Error en el login
-                Swal.fire({
-                    title: 'Error de inicio de sesión',
-                    text: resultado.message || 'Credenciales incorrectas',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar'
-                });
-            }
-            
-        } catch (error) {
-            console.error('Error en login:', error);
+            // Mostrar SweetAlert de éxito y redirigir
             Swal.fire({
-                title: 'Error de conexión',
-                text: 'Error de conexión. Por favor intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Reintentar'
+                title: '¡Inicio de sesión exitoso!',
+                text: `Bienvenido ${resultado.usuario.nombre}`,
+                icon: 'success',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = '/home';  // Redirección corregida
             });
-        } finally {
-            mostrarCargando(false);
+            
+        } else {
+            // Error en el login
+            Swal.fire({
+                title: 'Error de inicio de sesión',
+                text: resultado.message || 'Credenciales incorrectas',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
         }
-    });
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        Swal.fire({
+            title: 'Error de conexión',
+            text: 'Error de conexión. Por favor intenta nuevamente.',
+            icon: 'error',
+            confirmButtonText: 'Reintentar'
+        });
+    } finally {
+        mostrarCargando(false);
+    }
+});
 
     // Funciones de validación
     function validarLogin(datos) {
