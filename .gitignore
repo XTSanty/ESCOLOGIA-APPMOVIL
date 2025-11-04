@@ -75,3 +75,6 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+# Archivos temporales de migración
+migrar-datos.js
