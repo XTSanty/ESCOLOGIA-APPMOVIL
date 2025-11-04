@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Escuela - Plataforma ODS Escuelas</title>
+        <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8e6cf 0%, #c8f2d4 50%, #dcedc1 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(102, 187, 106, 0.1) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        .perfil-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 35px 40px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(76, 175, 80, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(129, 199, 132, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #66bb6a, #81c784, #a5d6a7);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .perfil-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .perfil-sidebar {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(129, 199, 132, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .perfil-sidebar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(76, 175, 80, 0.2);
+        }
+
+        .perfil-info {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #f0f4f0;
+        }
+
+        .perfil-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #66bb6a, #81c784);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(102, 187, 106, 0.3);
+            position: relative;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .perfil-avatar::after {
+            content: '';
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            border: 3px solid rgba(102, 187, 106, 0.3);
+            border-radius: 50%;
+            animation: ripple 2s ease-out infinite;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .perfil-nombre {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .perfil-institucion {
+            color: #66bb6a;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .perfil-detalles {
+            text-align: left;
+        }
+
+        .detalle-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8fdf9, #e8f5e9);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid #66bb6a;
+        }
+
+        .detalle-item:hover {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            transform: translateX(5px);
+        }
+
+        .detalle-icon {
+            color: #66bb6a;
+            margin-right: 15px;
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .detalle-text {
+            color: #555;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .perfil-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .perfil-section {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(129, 199, 132, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .perfil-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(76, 175, 80, 0.2);
+        }
+
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e8f5e9;
+        }
+
+        .section-title i {
+            color: #66bb6a;
+            font-size: 1.4rem;
+        }
+
+        /* Estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #66bb6a, #81c784);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-item:hover::before {
+            opacity: 1;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 187, 106, 0.4);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Actividad Reciente */
+        .actividad-list {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .actividad-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .actividad-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .actividad-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #66bb6a, #81c784);
+            border-radius: 10px;
+        }
+
+        .actividad-item {
+            padding: 18px;
+            border-left: 3px solid #66bb6a;
+            background: linear-gradient(135deg, #f8fdf9, #e8f5e9);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .actividad-item:hover {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(102, 187, 106, 0.2);
+        }
+
+        .actividad-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        .actividad-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .actividad-date {
+            color: #66bb6a;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Panel de Administración */
+        .admin-section {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(129, 199, 132, 0.15);
+            margin-top: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e8f5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #66bb6a;
+            box-shadow: 0 0 0 4px rgba(102, 187, 106, 0.1);
+            background: white;
+        }
+
+        .admin-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .admin-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+            min-width: 200px;
+        }
+
+        .update-btn {
+            background: linear-gradient(135deg, #66bb6a, #81c784);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 187, 106, 0.3);
+        }
+
+        .change-pass-btn {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 187, 106, 0.4);
+        }
+
+        .admin-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .no-actividad {
+            text-align: center;
+            color: #666;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        @media (max-width: 1024px) {
+            .perfil-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .perfil-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-buttons {
+                flex-direction: column;
+            }
+
+            .admin-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="perfil-container">
+        <div class="header">
+            <h1>🏫 Perfil de Escuela</h1>
+            <p>Proyectos activos, ubicación y especialidades</p>
+        </div>
+
+        <div class="perfil-grid">
+            <div class="perfil-sidebar">
+                <div class="perfil-info">
+                    <div class="perfil-avatar">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div class="perfil-nombre" id="perfilNombre">Cargando...</div>
+                    <div class="perfil-institucion" id="perfilInstitucion">Cargando...</div>
+                </div>
+
+                <div class="perfil-detalles">
+                    <div class="detalle-item">
+                        <i class="fas fa-envelope detalle-icon"></i>
+                        <span class="detalle-text" id="perfilEmail">Cargando...</span>
+                    </div>
+                    <div class="detalle-item">
+                        <i class="fas fa-user detalle-icon"></i>
+                        <span class="detalle-text" id="perfilUsuario">Cargando...</span>
+                    </div>
+                    <div class="detalle-item">
+                        <i class="fas fa-calendar detalle-icon"></i>
+                        <span class="detalle-text" id="perfilFecha">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="perfil-main">
+                <div class="perfil-section">
+                    <h3 class="section-title"><i class="fas fa-chart-line"></i> Estadísticas y Logros</h3>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Estadísticas se cargarán aquí -->
+                        <div class="stat-item">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Proyectos Activos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">8</div>
+                            <div class="stat-label">ODS Alcanzados</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">45</div>
+                            <div class="stat-label">Colaboradores</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Logros</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perfil-section">
+                    <h3 class="section-title"><i class="fas fa-history"></i> Actividad Reciente</h3>
+                    <div class="actividad-list" id="actividadList">
+                        <!-- Actividad se cargará aquí -->
+                        <div class="actividad-item">
+                            <div class="actividad-title">Nuevo proyecto iniciado</div>
+                            <div class="actividad-desc">Proyecto de reciclaje escolar implementado</div>
+                            <div class="actividad-date">Hace 2 horas</div>
+                        </div>
+                        <div class="actividad-item">
+                            <div class="actividad-title">Sensor activado</div>
+                            <div class="actividad-desc">Monitoreo de calidad del aire en funcionamiento</div>
+                            <div class="actividad-date">Hace 5 horas</div>
+                        </div>
+                        <div class="actividad-item">
+                            <div class="actividad-title">Colaboración establecida</div>
+                            <div class="actividad-desc">Conexión con Escuela Secundaria #3</div>
+                            <div class="actividad-date">Hace 1 día</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script src="perfil-escuela.js"></script>
+</body>
+</html>

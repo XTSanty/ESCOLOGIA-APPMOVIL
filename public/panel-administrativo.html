@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Plataforma ODS Escuelas</title>
+    <link rel="stylesheet" href="panel-administrativo.css">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>⚙️ Panel Administrativo</h1>
+            <p>Gestión de usuarios, proyectos y sensores</p>
+            
+            <div class="admin-info">
+                <h3><i class="fas fa-user-shield"></i> Sesión de Administrador</h3>
+                <p>Usuario: <strong id="adminUser">admin@escuela.edu.mx</strong> <span class="admin-badge">ADMIN</span></p>
+                <p>Acceso a todas las funciones del sistema</p>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsuarios">0</div>
+                    <div class="stat-label">Usuarios</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalProyectos">0</div>
+                    <div class="stat-label">Proyectos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPosts">0</div>
+                    <div class="stat-label">Publicaciones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalActivo">0</div>
+                    <div class="stat-label">Activos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('usuarios')">Usuarios</button>
+            <button class="tab-btn" onclick="showTab('proyectos')">Proyectos</button>
+            <button class="tab-btn" onclick="showTab('posts')">Publicaciones</button>
+        </div>
+
+        <!-- Tab de Usuarios -->
+        <div id="usuarios" class="tab-content active">
+            <div class="search-container">
+                <input type="text" id="searchUsuarios" class="search-input" placeholder="Buscar usuarios...">
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Institución</th>
+                            <th>Tipo</th>
+                            <th>Fecha Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuariosTable">
+                        <!-- Usuarios se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab de Proyectos -->
+        <div id="proyectos" class="tab-content">
+            <div class="search-container">
+                <input type="text" id="searchProyectos" class="search-input" placeholder="Buscar proyectos...">
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proyectosTable">
+                        <!-- Proyectos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab de Posts -->
+        <div id="posts" class="tab-content">
+            <div class="search-container">
+                <input type="text" id="searchPosts" class="search-input" placeholder="Buscar publicaciones...">
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Contenido</th>
+                            <th>Usuario</th>
+                            <th>Categoría</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTable">
+                        <!-- Posts se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab de Historial -->
+        <div id="historial" class="tab-content">
+            <div class="search-container">
+                <input type="text" id="searchHistorial" class="search-input" placeholder="Buscar en historial...">
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Acción</th>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historialTable">
+                        <!-- Historial se cargará aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab de Sensores -->
+        <div id="sensores" class="tab-content">
+            <div class="search-container">
+                <input type="text" id="searchSensores" class="search-input" placeholder="Buscar sensores...">
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Ubicación</th>
+                            <th>Estado</th>
+                            <th>Última Lectura</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sensoresTable">
+                        <!-- Sensores se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="panel-administrativo.js">
+        // Variables globales para PWA
+let deferredPrompt;
+
+// Detectar si es instalable
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Mostrar botón de instalación si quieres
+  console.log('✅ PWA lista para instalarse');
+});
+
+// Función para instalar (opcional)
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuario aceptó la instalación');
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+    </script>
+    
+</body>
+</html>

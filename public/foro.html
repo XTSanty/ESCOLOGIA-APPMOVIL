@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foro y Chat - Plataforma ODS Escuelas</title>
+    <link rel="stylesheet" href="foro.css">
+       <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+    
+    </style>
+</head>
+<body>
+    <div class="foro-container">
+        <div class="foro-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+            <div class="header-content">
+                <h1>💬 Foro y Chat</h1>
+                <p>Comparte ideas, proyectos y colabora con otras escuelas</p>
+            </div>
+            <div style="width: 150px;"></div> <!-- Espaciador para balance -->
+        </div>
+
+        <div class="toolbar">
+            <div class="search-container">
+                <input type="text" id="searchInput" name="searchInput" class="search-input" placeholder="Buscar por escuela, usuario o correo...">
+            </div>
+            
+            <div class="sort-container">
+                <label for="sortSelect">Ordenar:</label>
+                <select id="sortSelect" name="sortSelect" class="sort-select">
+                    <option value="newest">Más nuevo</option>
+                    <option value="oldest">Más viejo</option>
+                    <option value="popular">Más popular</option>
+                </select>
+            </div>
+
+            <div class="categories-filter" id="categoriesFilter">
+                <!-- Categorías se generarán dinámicamente -->
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="form-container" id="postFormContainer">
+                <h3>Crear nueva publicación</h3>
+                <form id="postForm">
+                    <div class="form-group">
+                        <label for="postTitle">Título</label>
+                        <input type="text" id="postTitle" name="title" placeholder="Escribe un título atractivo..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postCategory">Categoría</label>
+                        <select id="postCategory" name="category" required>
+                            <option value="">Selecciona una categoría</option>
+                            <!-- Opciones se generarán dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postContent">Contenido</label>
+                        <textarea id="postContent" name="content" placeholder="Escribe tu mensaje aquí..." required></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Publicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="posts-list" id="postsList">
+                <!-- Publicaciones se cargarán dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script src="foro.js"></script>
+</body>
+</html>

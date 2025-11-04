@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Plataforma ODS Escuelas</title>
+    <link rel="stylesheet" href="reportes.css">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+    </style>
+</head>
+<body>
+    <div class="reportes-container">
+        <div class="header">
+            <h1>📊 Reportes</h1>
+            <p>Indicadores de impacto educativo, ambiental y social</p>
+            
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="fechaDesde">Desde:</label>
+                    <input type="date" id="fechaDesde" class="filter-select">
+                </div>
+                <div class="filter-group">
+                    <label for="fechaHasta">Hasta:</label>
+                    <input type="date" id="fechaHasta" class="filter-select">
+                </div>
+                <div class="filter-group">
+                    <label for="tipoReporte">Tipo:</label>
+                    <select id="tipoReporte" class="filter-select">
+                        <option value="todos">Todos los tipos</option>
+                        <option value="educativo">Educativo</option>
+                        <option value="ambiental">Ambiental</option>
+                        <option value="social">Social</option>
+                    </select>
+                    <!-- Detalle de usuarios -->
+<div class="detail-container">
+    <h3><i class="fas fa-user-circle"></i> Usuarios y Actividad</h3>
+    <div class="detail-grid" id="usuariosActividad">
+        <!-- Aquí se llenará con usuarios y sus posts/comentarios -->
+    </div>
+</div>
+                </div>
+                <button class="export-btn" onclick="exportarExcel()">
+    <i class="fas fa-file-excel"></i> Exportar a Excel
+</button>
+                </button>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div class="kpi-number" id="totalProyectos">0</div>
+                <div class="kpi-label">Proyectos Activos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="proyectosTerminados">0</div>
+                <div class="kpi-label">Proyectos Terminados</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="impactoTotal">0</div>
+                <div class="kpi-label">Impacto Acumulado</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="participantes">0</div>
+                <div class="kpi-label">Participantes</div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Proyectos por Tipo</h3>
+                <div class="chart-container">
+                    <canvas id="proyectosChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title"><i class="fas fa-trend-up"></i> Tendencia Mensual</h3>
+                <div class="chart-container">
+                    <canvas id="tendenciaChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+<!-- Gráficos adicionales -->
+<div class="charts-container">
+    <div class="chart-card">
+        <h3 class="chart-title"><i class="fas fa-users"></i> Usuarios por Tipo</h3>
+        <div class="chart-container">
+            <canvas id="usuariosChart"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <h3 class="chart-title"><i class="fas fa-chart-line"></i> Actividad por Usuario</h3>
+        <div class="chart-container">
+            <canvas id="actividadChart"></canvas>
+        </div>
+    </div>
+</div>
+
+        <!-- Ranking de Escuelas -->
+        <div class="ranking-container">
+            <h3 class="ranking-title"><i class="fas fa-trophy"></i> Ranking de Escuelas</h3>
+            <ul class="ranking-list" id="rankingList">
+                <!-- Ranking se llenará aquí -->
+            </ul>
+        </div>
+
+        <!-- Progreso ODS -->
+        <div class="ods-progress-container">
+            <h3 class="ranking-title"><i class="fas fa-bullseye"></i> Progreso hacia ODS</h3>
+            <div class="ods-grid" id="odsGrid">
+                <!-- ODS se llenará aquí -->
+            </div>
+        </div>
+    </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="reportes.js">
+    // Variables globales para PWA
+let deferredPrompt;
+
+// Detectar si es instalable
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Mostrar botón de instalación si quieres
+  console.log('✅ PWA lista para instalarse');
+});
+
+// Función para instalar (opcional)
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuario aceptó la instalación');
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+</script> <!-- Tu archivo -->
+</body>
+</html>

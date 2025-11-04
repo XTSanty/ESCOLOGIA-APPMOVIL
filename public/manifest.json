@@ -1,0 +1,44 @@
+{
+  "name": "ESCOLOGIA - Plataforma ODS Escuelas",
+  "short_name": "ESCOLOGIA",
+  "description": "Plataforma educativa para conectar escuelas y promover el desarrollo sostenible",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#a8e6cf",
+  "theme_color": "#66bb6a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es-MX",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/Images/ESCOLOGIA.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Images/ESCOLOGIA.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": [
+    "education",
+    "sustainability",
+    "social"
+  ],
+  "shortcuts": [
+    {
+      "name": "Foro y Chat",
+      "short_name": "Foro",
+      "description": "Espacio de discusión y colaboración",
+      "url": "/foro"
+    },
+    {
+      "name": "Publicación de Proyectos",
+      "short_name": "Proyectos",
+      "description": "Descripción, objetivos ODS y recursos",
+      "url": "/publicacion-proyectos"
+    }
+  ]
+}
