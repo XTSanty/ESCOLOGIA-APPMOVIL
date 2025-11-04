@@ -28,22 +28,30 @@ app.use(cors({
 }));
 
 // Configuración de sesiones
-app.use(session({
+const sessionConfig = {
   name: 'escologia.sid',
   secret: process.env.SESSION_SECRET || 'tu-secreto-aqui-cambia-esto',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI, // ✅ Ahora usa la variable de .env
-    collectionName: 'sessions',
-    ttl: 7 * 24 * 60 * 60 // 7 días
-  }),
   cookie: {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días en milisegundos
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production' // true en producción con HTTPS
   }
-}));
+};
+
+// Solo usar MongoStore si hay una URL de MongoDB
+if (process.env.MONGODB_URI) {
+  sessionConfig.store = MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+    ttl: 7 * 24 * 60 * 60 // 7 días
+  });
+} else {
+  console.warn('⚠️ MONGODB_URI no encontrada. Usando store en memoria (no recomendado para producción)');
+}
+
+app.use(session(sessionConfig));
 
 // Middleware para parsear JSON y formularios
 app.use(express.json());
@@ -61,6 +69,10 @@ app.get('/favicon.ico', (req, res) => {
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI;
+    
+    if (!mongoURI) {
+      throw new Error('MONGODB_URI no está definida en las variables de entorno');
+    }
     
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
@@ -204,7 +216,7 @@ app.use((err, req, res, next) => {
 
 // Iniciar el servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
   console.log(`📁 Archivos estáticos servidos desde: ${path.join(__dirname, 'public')}`);
   console.log(`🔒 Sesiones activadas con persistencia en MongoDB Atlas`);
 });
