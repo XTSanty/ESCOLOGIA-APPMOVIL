@@ -548,5 +548,34 @@
         </div>
 
     <script src="perfil-escuela.js"></script>
+    <script>
+  function goBack() {
+    window.location.href = "home.html";
+  }
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.Capacitor) {
+    const { App } = window.Capacitor.Plugins;
+
+    App.addListener('backButton', () => {
+      // En lugar de cerrar la app, regresa a la pantalla anterior
+      if (window.location.pathname.includes("perfil-escuela.html")) {
+        window.location.href = "home.html";
+      } else {
+        window.history.back();
+      }
+    });
+  }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></script>
+<script src="js/boton.js"></script>
+<script src="js/globalBackHandler.js"></script>
+<!-- Botón Volver Fijo -->
+<button class="back-button-fixed" onclick="goBack()">
+    <i class="fas fa-arrow-left"></i>
+    <span>Volver</span>
+</button>
 </body>
 </html>

@@ -5,12 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes - Plataforma ODS Escuelas</title>
     <link rel="stylesheet" href="reportes.css">
-        <link rel="manifest" href="/manifest.json">
-        <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ✅ ESTILO DEL BOTÓN VOLVER -->
     <style>
+      .back-button-fixed {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #1e88e5;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        z-index: 9999;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: background 0.3s ease, transform 0.2s ease;
+      }
+      .back-button-fixed:hover {
+        background-color: #1565c0;
+        transform: scale(1.05);
+      }
+      .back-button-fixed i {
+        font-size: 18px;
+      }
     </style>
 </head>
 <body>
@@ -36,17 +64,17 @@
                         <option value="ambiental">Ambiental</option>
                         <option value="social">Social</option>
                     </select>
+
                     <!-- Detalle de usuarios -->
-<div class="detail-container">
-    <h3><i class="fas fa-user-circle"></i> Usuarios y Actividad</h3>
-    <div class="detail-grid" id="usuariosActividad">
-        <!-- Aquí se llenará con usuarios y sus posts/comentarios -->
-    </div>
-</div>
+                    <div class="detail-container">
+                        <h3><i class="fas fa-user-circle"></i> Usuarios y Actividad</h3>
+                        <div class="detail-grid" id="usuariosActividad">
+                            <!-- Aquí se llenará con usuarios y sus posts/comentarios -->
+                        </div>
+                    </div>
                 </div>
                 <button class="export-btn" onclick="exportarExcel()">
-    <i class="fas fa-file-excel"></i> Exportar a Excel
-</button>
+                    <i class="fas fa-file-excel"></i> Exportar a Excel
                 </button>
             </div>
         </div>
@@ -87,66 +115,63 @@
             </div>
         </div>
 
-<!-- Gráficos adicionales -->
-<div class="charts-container">
-    <div class="chart-card">
-        <h3 class="chart-title"><i class="fas fa-users"></i> Usuarios por Tipo</h3>
-        <div class="chart-container">
-            <canvas id="usuariosChart"></canvas>
+        <!-- Gráficos adicionales -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3 class="chart-title"><i class="fas fa-users"></i> Usuarios por Tipo</h3>
+                <div class="chart-container">
+                    <canvas id="usuariosChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title"><i class="fas fa-chart-line"></i> Actividad por Usuario</h3>
+                <div class="chart-container">
+                    <canvas id="actividadChart"></canvas>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="chart-card">
-        <h3 class="chart-title"><i class="fas fa-chart-line"></i> Actividad por Usuario</h3>
-        <div class="chart-container">
-            <canvas id="actividadChart"></canvas>
-        </div>
-    </div>
-</div>
 
         <!-- Ranking de Escuelas -->
         <div class="ranking-container">
             <h3 class="ranking-title"><i class="fas fa-trophy"></i> Ranking de Escuelas</h3>
-            <ul class="ranking-list" id="rankingList">
-                <!-- Ranking se llenará aquí -->
-            </ul>
+            <ul class="ranking-list" id="rankingList"></ul>
         </div>
 
         <!-- Progreso ODS -->
         <div class="ods-progress-container">
             <h3 class="ranking-title"><i class="fas fa-bullseye"></i> Progreso hacia ODS</h3>
-            <div class="ods-grid" id="odsGrid">
-                <!-- ODS se llenará aquí -->
-            </div>
+            <div class="ods-grid" id="odsGrid"></div>
         </div>
     </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="reportes.js">
-    // Variables globales para PWA
-let deferredPrompt;
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="reportes.js"></script>
 
-// Detectar si es instalable
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Mostrar botón de instalación si quieres
-  console.log('✅ PWA lista para instalarse');
-});
+  <!-- ✅ Función para volver -->
+  <script>
+    function goBack() {
+      window.location.href = "home.html";
+    }
+  </script>
 
-// Función para instalar (opcional)
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('Usuario aceptó la instalación');
+  <!-- ✅ Manejador global del botón atrás en Capacitor -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.Capacitor) {
+        const { App } = window.Capacitor.Plugins;
+        App.addListener('backButton', () => {
+          window.history.back();
+        });
       }
-      deferredPrompt = null;
     });
-  }
-}
-</script> <!-- Tu archivo -->
+  </script>
+
+  <!-- ✅ Botón flotante visible -->
+  <button class="back-button-fixed" onclick="goBack()">
+    <i class="fas fa-arrow-left"></i>
+    <span>Volver</span>
+  </button>
+
 </body>
 </html>

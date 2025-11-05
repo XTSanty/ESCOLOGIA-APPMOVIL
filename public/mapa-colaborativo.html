@@ -697,6 +697,22 @@ function installPWA() {
   }
 }
     </script>
-    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.Capacitor) {
+    const { App } = window.Capacitor.Plugins;
+
+    App.addListener('backButton', () => {
+      // En lugar de cerrar la app, regresa a la pantalla anterior
+      if (window.location.pathname.includes("perfil-escuela.html")) {
+        window.location.href = "home.html";
+      } else {
+        window.history.back();
+      }
+    });
+  }
+});
+</script>
+
 </body>
 </html>

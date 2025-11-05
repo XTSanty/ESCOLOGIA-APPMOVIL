@@ -1,0 +1,14 @@
+{
+  "appId": "com.Sergiosantiago.Escologia",
+  "appName": "ESCOLOGIA10C",
+  "webDir": "public",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://escologia-production.up.railway.app/",
+    "cleartext": true
+  },
+  "resources": {
+    "icon": "resources/ESCOLOGIA.JPG",
+    "favicon": "resources/ESCOLOGIA.ICO"
+  }
+}

@@ -5,22 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publicación de Proyectos - Plataforma ODS Escuelas</title>
     <link rel="stylesheet" href="publicacion-proyectos.css">
-        <link rel="manifest" href="/manifest.json">
-        <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/x-icon" href="/Images/ESCOLOGIA.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
+        /* Botón volver fijo */
+        .back-button-fixed {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            background: linear-gradient(135deg, #4CAF50, #66bb6a);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+
+        .back-button-fixed:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(76, 175, 80, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .back-button-fixed {
+                bottom: 15px;
+                left: 15px;
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <button class="back-btn" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i> Volver
-            </button>
     <div class="proyectos-container">
         <div class="header">
             <h1>📢 Publicación de Proyectos</h1>
             <p>Descripción, objetivos ODS y recursos necesarios</p>
-            
+
             <div class="stats-container">
                 <div class="stat-card">
                     <div class="stat-number" id="totalProyectos">0</div>
@@ -41,13 +73,13 @@
             <div class="search-container">
                 <input type="text" id="searchInput" class="search-input" placeholder="Buscar proyectos...">
             </div>
-            
+
             <div class="filter-buttons">
                 <button class="filter-btn active" data-estado="todos">Todos</button>
                 <button class="filter-btn" data-estado="pendiente">Pendientes</button>
                 <button class="filter-btn" data-estado="terminado">Terminados</button>
             </div>
-            
+
             <button class="create-btn" onclick="openCreateModal()">
                 <i class="fas fa-plus"></i> Nuevo Proyecto
             </button>
@@ -63,18 +95,18 @@
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <h3 id="modalTitle">Crear Nuevo Proyecto</h3>
-            
+
             <form id="proyectoForm">
                 <div class="form-group">
                     <label for="nombre">Nombre del Proyecto</label>
                     <input type="text" id="nombre" name="nombre" required placeholder="Escribe el nombre del proyecto...">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="descripcion">Descripción</label>
                     <textarea id="descripcion" name="descripcion" rows="4" required placeholder="Describe el proyecto..."></textarea>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="button" class="cancel-btn" onclick="closeModal()">Cancelar</button>
                     <button type="submit" class="save-btn">Guardar</button>
@@ -83,32 +115,32 @@
         </div>
     </div>
 
-    <script src="publicacion-proyectos.js">
-        // Variables globales para PWA
-let deferredPrompt;
+    <!-- Scripts principales -->
+    <script src="publicacion-proyectos.js"></script>
 
-// Detectar si es instalable
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Mostrar botón de instalación si quieres
-  console.log('✅ PWA lista para instalarse');
-});
+    <!-- Botón Volver -->
+    <button class="back-button-fixed" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+    </button>
 
-// Función para instalar (opcional)
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('Usuario aceptó la instalación');
+    <script>
+      function goBack() {
+        window.location.href = "home.html";
       }
-      deferredPrompt = null;
-    });
-  }
-}
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.Capacitor) {
+          const { App } = window.Capacitor.Plugins;
+          App.addListener('backButton', () => {
+            if (window.location.pathname.includes("perfil-escuela.html")) {
+              window.location.href = "home.html";
+            } else {
+              window.history.back();
+            }
+          });
+        }
+      });
     </script>
-    
 </body>
 </html>
