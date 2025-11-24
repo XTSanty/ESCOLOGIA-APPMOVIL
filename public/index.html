@@ -1,46 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
   <title>ESCOLOGIA</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <noscript>
     <meta http-equiv="refresh" content="0; url=login.html">
   </noscript>
 </head>
 <body>
-
-<script>
-  // Tiempo de expiración: 7 días en milisegundos
-  const EXPIRACION_SESION = 7 * 24 * 60 * 60 * 1000;
-
-  function verificarSesionLocal() {
-    const sesion = localStorage.getItem("sesionActiva");
-    const fechaExp = localStorage.getItem("sesionExpira");
-
-    // Si no hay sesión → login
-    if (!sesion || !fechaExp) {
-      window.location.href = "login.html";
-      return;
-    }
-
-    const ahora = Date.now();
-
-    // Si ya expiró → cerrar sesión automáticamente
-    if (ahora > Number(fechaExp)) {
-      localStorage.removeItem("sesionActiva");
-      localStorage.removeItem("sesionExpira");
-      window.location.href = "login.html";
-      return;
-    }
-
-    // Aquí todavía es válida → enviar al home
-    window.location.href = "home.html";
-  }
-
-  verificarSesionLocal();
-</script>
-
+  <script>
+    // Redirigir al login
+    window.location.href = 'login.html';
+  </script>
 </body>
 </html>

@@ -303,7 +303,13 @@ function editarUsuario(id) {
             </div>
             <div class="swal-form-group">
                 <label><i class="fas fa-key"></i> Nueva Contraseña:</label>
-                <input type="password" id="editPassword" placeholder="Nueva contraseña (opcional)" autocomplete="new-password">
+               <div class="password-wrapper">
+    <input type="password" id="editPassword" placeholder="Nueva contraseña (opcional)" autocomplete="new-password">
+    <button type="button" class="toggle-pass" data-target="editPassword">
+        <i class="fas fa-eye"></i>
+    </button>
+</div>
+
             </div>
             <div class="swal-form-group">
                 <label><i class="fas fa-key"></i> Confirmar Contraseña:</label>
@@ -600,6 +606,25 @@ function showTab(tabName) {
     
     document.getElementById(tabName).classList.add('active');
     event.target.classList.add('active');
+}
+
+didOpen: () => {
+    document.querySelectorAll(".toggle-pass").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const input = document.getElementById(btn.dataset.target);
+            const icon = btn.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        });
+    });
 }
 
 function goBack() {
