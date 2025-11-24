@@ -241,7 +241,6 @@ function renderSensores() {
     `).join('');
 }
 
-// ✅ FUNCIÓN ACTUALIZADA: Editar Usuario con campo de contraseña
 function editarUsuario(id) {
     const usuario = usuarios.find(u => u._id === id);
     if (!usuario) {
@@ -285,7 +284,22 @@ function editarUsuario(id) {
                     font-size: 13px;
                     color: #856404;
                 }
+                .password-wrapper {
+                    position: relative;
+                }
+                .password-wrapper button.toggle-pass {
+                    position: absolute;
+                    right: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 16px;
+                    color: #555;
+                }
             </style>
+
             <div class="swal-form-group">
                 <label><i class="fas fa-user"></i> Nombre:</label>
                 <input type="text" id="editNombre" value="${usuario.nombre}" placeholder="Nombre completo">
@@ -303,17 +317,21 @@ function editarUsuario(id) {
             </div>
             <div class="swal-form-group">
                 <label><i class="fas fa-key"></i> Nueva Contraseña:</label>
-               <div class="password-wrapper">
-    <input type="password" id="editPassword" placeholder="Nueva contraseña (opcional)" autocomplete="new-password">
-    <button type="button" class="toggle-pass" data-target="editPassword">
-        <i class="fas fa-eye"></i>
-    </button>
-</div>
-
+                <div class="password-wrapper">
+                    <input type="password" id="editPassword" placeholder="Nueva contraseña (opcional)" autocomplete="new-password">
+                    <button type="button" class="toggle-pass" data-target="editPassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
             <div class="swal-form-group">
                 <label><i class="fas fa-key"></i> Confirmar Contraseña:</label>
-                <input type="password" id="editPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password">
+                <div class="password-wrapper">
+                    <input type="password" id="editPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password">
+                    <button type="button" class="toggle-pass" data-target="editPasswordConfirm">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
         `,
         width: 600,
@@ -329,20 +347,17 @@ function editarUsuario(id) {
             const password = document.getElementById('editPassword').value;
             const passwordConfirm = document.getElementById('editPasswordConfirm').value;
 
-            // Validaciones
             if (!nombre || !correo || !institucion) {
                 Swal.showValidationMessage('Por favor completa todos los campos obligatorios');
                 return false;
             }
 
-            // Validar email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(correo)) {
                 Swal.showValidationMessage('Por favor ingresa un correo válido');
                 return false;
             }
 
-            // Validar contraseña solo si se ingresó
             if (password || passwordConfirm) {
                 if (password !== passwordConfirm) {
                     Swal.showValidationMessage('Las contraseñas no coinciden');
@@ -358,8 +373,26 @@ function editarUsuario(id) {
                 nombre,
                 correo,
                 institucion,
-                password: password || null // null si no se cambió
+                password: password || null
             };
+        },
+        didOpen: () => {
+            document.querySelectorAll(".toggle-pass").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const input = document.getElementById(btn.dataset.target);
+                    const icon = btn.querySelector("i");
+
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.classList.remove("fa-eye");
+                        icon.classList.add("fa-eye-slash");
+                    } else {
+                        input.type = "password";
+                        icon.classList.remove("fa-eye-slash");
+                        icon.classList.add("fa-eye");
+                    }
+                });
+            });
         }
     }).then(async (result) => {
         if (result.isConfirmed) {
