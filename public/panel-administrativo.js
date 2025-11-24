@@ -35,9 +35,8 @@ function loadUserInfo() {
 
 // Verificar acceso de administrador
 function checkAdminAccess() {
-    // Verificar si el usuario es administrador
     isAdmin = currentUser.email === 'admin@escuela.edu.mx' || 
-              currentUser.email === 'sergio.admin@escuela.edu.mx' || // Puedes añadir más emails de admin
+              currentUser.email === 'sergio.admin@escuela.edu.mx' ||
               currentUser.tipoUsuario === 'admin';
     
     if (!isAdmin) {
@@ -60,7 +59,6 @@ function showAccessDenied() {
 
 // Event listeners
 function setupEventListeners() {
-    // Filtros de búsqueda
     document.getElementById('searchUsuarios').addEventListener('input', () => renderUsuarios());
     document.getElementById('searchProyectos').addEventListener('input', () => renderProyectos());
     document.getElementById('searchPosts').addEventListener('input', () => renderPosts());
@@ -87,8 +85,6 @@ async function loadData() {
             posts = await postsResponse.json();
         }
 
-
-        // Actualizar todo
         updateStats();
         renderUsuarios();
         renderProyectos();
@@ -209,15 +205,8 @@ function renderPosts() {
 
 // Renderizar historial
 function renderHistorial() {
-    const searchTerm = document.getElementById('searchHistorial').value.toLowerCase();
-    const filteredHistorial = historial.filter(item => 
-        item.usuario.toLowerCase().includes(searchTerm) ||
-        item.accion.toLowerCase().includes(searchTerm) ||
-        item.descripcion.toLowerCase().includes(searchTerm)
-    );
-
     const tbody = document.getElementById('historialTable');
-    tbody.innerHTML = filteredHistorial.map(item => `
+    tbody.innerHTML = historial.map(item => `
         <tr>
             <td>${item.usuario}</td>
             <td>${item.accion}</td>
@@ -230,14 +219,8 @@ function renderHistorial() {
 
 // Renderizar sensores
 function renderSensores() {
-    const searchTerm = document.getElementById('searchSensores').value.toLowerCase();
-    const filteredSensores = sensores.filter(sensor => 
-        sensor.nombre.toLowerCase().includes(searchTerm) ||
-        sensor.ubicacion.toLowerCase().includes(searchTerm)
-    );
-
     const tbody = document.getElementById('sensoresTable');
-    tbody.innerHTML = filteredSensores.map(sensor => `
+    tbody.innerHTML = sensores.map(sensor => `
         <tr>
             <td>${sensor._id}</td>
             <td>${sensor.nombre}</td>
@@ -258,9 +241,188 @@ function renderSensores() {
     `).join('');
 }
 
-// Funciones de edición/eliminación (simuladas por ahora)
+// ✅ FUNCIÓN ACTUALIZADA: Editar Usuario con campo de contraseña
 function editarUsuario(id) {
-    showEditModal('usuario', id);
+    const usuario = usuarios.find(u => u._id === id);
+    if (!usuario) {
+        showErrorMessage('Usuario no encontrado');
+        return;
+    }
+
+    Swal.fire({
+        title: '<i class="fas fa-user-edit"></i> Editar Usuario',
+        html: `
+            <style>
+                .swal-form-group {
+                    margin-bottom: 15px;
+                    text-align: left;
+                }
+                .swal-form-group label {
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 600;
+                    color: #333;
+                }
+                .swal-form-group input {
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    box-sizing: border-box;
+                }
+                .swal-form-group input:focus {
+                    outline: none;
+                    border-color: #3085d6;
+                    box-shadow: 0 0 0 3px rgba(48, 133, 214, 0.1);
+                }
+                .password-info {
+                    background: #fff3cd;
+                    border: 1px solid #ffc107;
+                    padding: 10px;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                    font-size: 13px;
+                    color: #856404;
+                }
+            </style>
+            <div class="swal-form-group">
+                <label><i class="fas fa-user"></i> Nombre:</label>
+                <input type="text" id="editNombre" value="${usuario.nombre}" placeholder="Nombre completo">
+            </div>
+            <div class="swal-form-group">
+                <label><i class="fas fa-envelope"></i> Correo:</label>
+                <input type="email" id="editCorreo" value="${usuario.correo}" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="swal-form-group">
+                <label><i class="fas fa-school"></i> Institución:</label>
+                <input type="text" id="editInstitucion" value="${usuario.institucion}" placeholder="Nombre de la institución">
+            </div>
+            <div class="password-info">
+                <i class="fas fa-info-circle"></i> <strong>Cambiar contraseña:</strong> Deja el campo vacío para mantener la contraseña actual
+            </div>
+            <div class="swal-form-group">
+                <label><i class="fas fa-key"></i> Nueva Contraseña:</label>
+                <input type="password" id="editPassword" placeholder="Nueva contraseña (opcional)" autocomplete="new-password">
+            </div>
+            <div class="swal-form-group">
+                <label><i class="fas fa-key"></i> Confirmar Contraseña:</label>
+                <input type="password" id="editPasswordConfirm" placeholder="Confirmar nueva contraseña" autocomplete="new-password">
+            </div>
+        `,
+        width: 600,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-save"></i> Guardar Cambios',
+        cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        preConfirm: () => {
+            const nombre = document.getElementById('editNombre').value.trim();
+            const correo = document.getElementById('editCorreo').value.trim();
+            const institucion = document.getElementById('editInstitucion').value.trim();
+            const password = document.getElementById('editPassword').value;
+            const passwordConfirm = document.getElementById('editPasswordConfirm').value;
+
+            // Validaciones
+            if (!nombre || !correo || !institucion) {
+                Swal.showValidationMessage('Por favor completa todos los campos obligatorios');
+                return false;
+            }
+
+            // Validar email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(correo)) {
+                Swal.showValidationMessage('Por favor ingresa un correo válido');
+                return false;
+            }
+
+            // Validar contraseña solo si se ingresó
+            if (password || passwordConfirm) {
+                if (password !== passwordConfirm) {
+                    Swal.showValidationMessage('Las contraseñas no coinciden');
+                    return false;
+                }
+                if (password.length < 6) {
+                    Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
+                    return false;
+                }
+            }
+
+            return {
+                nombre,
+                correo,
+                institucion,
+                password: password || null // null si no se cambió
+            };
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await actualizarUsuario(id, result.value);
+        }
+    });
+}
+
+// ✅ NUEVA FUNCIÓN: Actualizar usuario en la base de datos
+async function actualizarUsuario(id, datos) {
+    try {
+        Swal.fire({
+            title: 'Actualizando...',
+            html: 'Por favor espera mientras se actualizan los datos',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const response = await fetch(`/api/admin/users/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Actualizar el array local de usuarios
+            const index = usuarios.findIndex(u => u._id === id);
+            if (index !== -1) {
+                usuarios[index] = { ...usuarios[index], ...datos };
+                // No actualizar la contraseña en el frontend
+                delete usuarios[index].password;
+            }
+            
+            renderUsuarios();
+            
+            Swal.fire({
+                title: '¡Éxito!',
+                html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <p><strong>Usuario actualizado correctamente:</strong></p>
+                        <ul style="margin-top: 10px;">
+                            <li>✅ Nombre: ${datos.nombre}</li>
+                            <li>✅ Correo: ${datos.correo}</li>
+                            <li>✅ Institución: ${datos.institucion}</li>
+                            ${datos.password ? '<li>✅ Contraseña actualizada</li>' : ''}
+                        </ul>
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            });
+        } else {
+            throw new Error(result.message || 'Error al actualizar usuario');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'No se pudo actualizar el usuario',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+    }
 }
 
 function eliminarUsuario(id) {
@@ -273,12 +435,13 @@ function eliminarUsuario(id) {
         cancelButtonColor: '#d33',
         confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            fetch(`/api/admin/users/${id}`, {
-                method: 'DELETE'
-            })
-            .then(response => {
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE'
+                });
+                
                 if (response.ok) {
                     usuarios = usuarios.filter(u => u._id !== id);
                     renderUsuarios();
@@ -287,58 +450,109 @@ function eliminarUsuario(id) {
                 } else {
                     throw new Error('Error al eliminar usuario');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error:', error);
                 showErrorMessage('Error al eliminar usuario');
-            });
+            }
         }
     });
 }
 
 function editarProyecto(id) {
-    showEditModal('proyecto', id);
+    const proyecto = proyectos.find(p => p._id === id);
+    
+    Swal.fire({
+        title: 'Editar Proyecto',
+        html: `
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" id="editNombre" value="${proyecto?.nombre || ''}" class="swal2-input">
+            </div>
+            <div class="form-group">
+                <label>Descripción:</label>
+                <textarea id="editDescripcion" class="swal2-textarea">${proyecto?.descripcion || ''}</textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar'
+    });
 }
 
 function eliminarProyecto(id) {
-    fetch(`/api/proyectos/${id}`, {
-        method: 'DELETE'
-    })
-    .then(response => {
-        if (response.ok) {
-            proyectos = proyectos.filter(p => p._id !== id);
-            renderProyectos();
-            updateStats();
-        } else {
-            throw new Error('Error al eliminar proyecto');
+    Swal.fire({
+        title: '¿Eliminar proyecto?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/api/proyectos/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    proyectos = proyectos.filter(p => p._id !== id);
+                    renderProyectos();
+                    updateStats();
+                    Swal.fire('Eliminado', 'Proyecto eliminado exitosamente', 'success');
+                }
+            } catch (error) {
+                showErrorMessage('Error al eliminar proyecto');
+            }
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showErrorMessage('Error al eliminar proyecto');
     });
 }
 
 function editarPost(id) {
-    showEditModal('post', id);
+    const post = posts.find(p => p._id === id);
+    
+    Swal.fire({
+        title: 'Editar Publicación',
+        html: `
+            <div class="form-group">
+                <label>Título:</label>
+                <input type="text" id="editTitulo" value="${post?.title || ''}" class="swal2-input">
+            </div>
+            <div class="form-group">
+                <label>Contenido:</label>
+                <textarea id="editContenido" class="swal2-textarea">${post?.content || ''}</textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Guardar',
+        cancelButtonText: 'Cancelar'
+    });
 }
 
 function eliminarPost(id) {
-    fetch(`/api/posts/${id}`, {
-        method: 'DELETE'
-    })
-    .then(response => {
-        if (response.ok) {
-            posts = posts.filter(p => p._id !== id);
-            renderPosts();
-            updateStats();
-        } else {
-            throw new Error('Error al eliminar post');
+    Swal.fire({
+        title: '¿Eliminar publicación?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/api/posts/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    posts = posts.filter(p => p._id !== id);
+                    renderPosts();
+                    updateStats();
+                    Swal.fire('Eliminado', 'Publicación eliminada exitosamente', 'success');
+                }
+            } catch (error) {
+                showErrorMessage('Error al eliminar publicación');
+            }
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showErrorMessage('Error al eliminar post');
     });
 }
 
@@ -351,83 +565,10 @@ function eliminarSensor(id) {
     renderSensores();
 }
 
-// Modal de edición
 function showEditModal(type, id) {
-    let title = '';
-    let fields = '';
-    
-    switch(type) {
-        case 'usuario':
-            title = 'Editar Usuario';
-            fields = `
-                <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" id="editNombre" value="${usuarios.find(u => u._id === id)?.nombre || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Correo:</label>
-                    <input type="email" id="editCorreo" value="${usuarios.find(u => u._id === id)?.correo || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Institución:</label>
-                    <input type="text" id="editInstitucion" value="${usuarios.find(u => u._id === id)?.institucion || ''}">
-                </div>
-            `;
-            break;
-        case 'proyecto':
-            title = 'Editar Proyecto';
-            fields = `
-                <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" id="editNombre" value="${proyectos.find(p => p._id === id)?.nombre || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Descripción:</label>
-                    <textarea id="editDescripcion">${proyectos.find(p => p._id === id)?.descripcion || ''}</textarea>
-                </div>
-            `;
-            break;
-        case 'post':
-            title = 'Editar Publicación';
-            fields = `
-                <div class="form-group">
-                    <label>Título:</label>
-                    <input type="text" id="editTitulo" value="${posts.find(p => p._id === id)?.title || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Contenido:</label>
-                    <textarea id="editContenido">${posts.find(p => p._id === id)?.content || ''}</textarea>
-                </div>
-            `;
-            break;
-    }
-
-    Swal.fire({
-        title: title,
-        html: fields,
-        showCancelButton: true,
-        confirmButtonText: 'Guardar',
-        cancelButtonText: 'Cancelar',
-        preConfirm: () => {
-            return {
-                nombre: document.getElementById('editNombre')?.value,
-                correo: document.getElementById('editCorreo')?.value,
-                institucion: document.getElementById('editInstitucion')?.value,
-                descripcion: document.getElementById('editDescripcion')?.value,
-                titulo: document.getElementById('editTitulo')?.value,
-                contenido: document.getElementById('editContenido')?.value
-            };
-        }
-    }).then(result => {
-        if (result.isConfirmed) {
-            // Aquí se haría la actualización real en la base de datos
-            console.log('Datos actualizados:', result.value);
-            Swal.fire('¡Actualizado!', 'Datos actualizados exitosamente', 'success');
-        }
-    });
+    console.log(`Editando ${type} con ID: ${id}`);
 }
 
-// Mostrar mensaje de error
 function showErrorMessage(message) {
     Swal.fire({
         title: 'Error',
@@ -437,7 +578,6 @@ function showErrorMessage(message) {
     });
 }
 
-// Formatear fecha
 function formatDate(date) {
     if (!date) return 'N/A';
     const d = new Date(date);
@@ -450,9 +590,7 @@ function formatDate(date) {
     });
 }
 
-// Mostrar pestaña
 function showTab(tabName) {
-    // Ocultar todas las pestañas
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
@@ -460,12 +598,10 @@ function showTab(tabName) {
         btn.classList.remove('active');
     });
     
-    // Mostrar la pestaña seleccionada
     document.getElementById(tabName).classList.add('active');
     event.target.classList.add('active');
 }
 
-// Función para volver atrás
 function goBack() {
     window.location.href = '/home';
 }

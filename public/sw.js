@@ -1,5 +1,5 @@
 // sw.js - Service Worker para ESCOLOGIA PWA
-const VERSION = 'v1.0.36';
+const VERSION = 'v1.0.37';
 const APP_CACHE_NAME = `escologia-${VERSION}`;
 
 // ✅ Archivos estáticos que SÍ queremos cachear

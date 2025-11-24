@@ -1,14 +1,10 @@
 {
-  "appId": "com.Sergiosantiago.Escologia",
-  "appName": "ESCOLOGIA10C",
+  "appId": "com.sergiosantiago.escologiaappmovil",
+  "appName": "ESCOLOGIA APP MOVIL",
   "webDir": "public",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://escologia-production.up.railway.app/",
+    "url": "https://escologia-appmovil-production.up.railway.app/",
     "cleartext": true
-  },
-  "resources": {
-    "icon": "resources/ESCOLOGIA.JPG",
-    "favicon": "resources/ESCOLOGIA.ICO"
   }
 }

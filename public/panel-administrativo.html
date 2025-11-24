@@ -174,7 +174,6 @@
     </div>
 
     <script src="panel-administrativo.js">
-        
         // Variables globales para PWA
 let deferredPrompt;
 
@@ -200,39 +199,6 @@ function installPWA() {
   }
 }
     </script>
-<script>
-  function goBack() {
-    window.location.href = "home.html";
-  }
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.Capacitor) {
-    const { App } = window.Capacitor.Plugins;
-
-    App.addListener('backButton', () => {
-      // En lugar de cerrar la app, regresa a la pantalla anterior
-      if (window.location.pathname.includes("perfil-escuela.html")) {
-        window.location.href = "home.html";
-      } else {
-        window.history.back();
-      }
-    });
-  }
-});
-</script>
- <!-- Botón Volver Fijo -->
-    <button class="back-button-fixed" onclick="goBack()">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
-    </button>
-
-    <!-- Scripts -->
-    <script src="perfil-escuela.js"></script> <!-- O el JS correspondiente -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-    <script src="js/globalBackHandler.js"></script>
-</body>
-</html>
-
+    
 </body>
 </html>
