@@ -12,31 +12,34 @@
 <body>
 
 <script>
-  // AUTO-LOGIN: Verificar si la sesión está activa
-  async function verificarSesion() {
-    try {
-      const respuesta = await fetch("/api/auth/me", {
-        method: "GET",
-        credentials: "include" // importante para enviar la cookie de sesión
-      });
+  // Tiempo de expiración: 7 días en milisegundos
+  const EXPIRACION_SESION = 7 * 24 * 60 * 60 * 1000;
 
-      const data = await respuesta.json();
+  function verificarSesionLocal() {
+    const sesion = localStorage.getItem("sesionActiva");
+    const fechaExp = localStorage.getItem("sesionExpira");
 
-      if (data.success === true) {
-        // 🔥 YA HAY SESIÓN → ENTRAR DIRECTO AL HOME
-        window.location.href = "home.html";
-      } else {
-        // ❌ NO HAY SESIÓN → IR AL LOGIN
-        window.location.href = "login.html";
-      }
-
-    } catch (error) {
-      // Error de red, servidor caído, etc.
+    // Si no hay sesión → login
+    if (!sesion || !fechaExp) {
       window.location.href = "login.html";
+      return;
     }
+
+    const ahora = Date.now();
+
+    // Si ya expiró → cerrar sesión automáticamente
+    if (ahora > Number(fechaExp)) {
+      localStorage.removeItem("sesionActiva");
+      localStorage.removeItem("sesionExpira");
+      window.location.href = "login.html";
+      return;
+    }
+
+    // Aquí todavía es válida → enviar al home
+    window.location.href = "home.html";
   }
 
-  verificarSesion();
+  verificarSesionLocal();
 </script>
 
 </body>
